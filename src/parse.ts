@@ -4,14 +4,18 @@ export interface Bonk {
   type: "increment" | "set";
 }
 
-export function parseCommandStyle(message: string): Bonk | undefined {
+function capitalizeFirstLetter(s: string) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+export function parseCommandStyle(message: string): Bonk[] {
   const text = message.toString().trim();
-  if (!text.startsWith("!bonk")) return;
+  if (!text.startsWith("!bonk")) return [];
   const words = text.split(" ");
   const cmdWord = words.shift();
   if (cmdWord !== "!bonk") {
     console.error("Something went wrong! Unexpected command word", cmdWord);
-    return;
+    return [];
   }
 
   const bonkProps = { name: "Lumin", count: 1, type: "increment" as const };
@@ -30,26 +34,23 @@ export function parseCommandStyle(message: string): Bonk | undefined {
     }
   }
 
-  return bonkProps;
+  return [bonkProps];
 }
 
-export function parseReportStyle(message: string): Bonk | undefined {
-  const regex = /(.*)\sbonk\s(\d+)/;
-  const matches = message.match(regex);
-  if (!matches) return;
-  const [_, name, countStr] = matches;
-
-  return { name, count: parseInt(countStr, 10), type: "set" as const };
+export function parseReportStyle(message: string): Bonk[] {
+  const regex = /([^,\n]*)\sbonk\s(\d+),?/g;
+  return Array.from(message.matchAll(regex)).map((match) => {
+    const [_, name, countStr] = match;
+    return {
+      name: capitalizeFirstLetter(name.trim()),
+      count: parseInt(countStr, 10),
+      type: "set" as const,
+    };
+  });
 }
 
-export function parseBonk(message: string): Bonk | undefined {
+export function parseBonk(message: string): Bonk[] {
   const cmdStyle = parseCommandStyle(message);
-  if (cmdStyle) {
-    return cmdStyle;
-  }
-
   const reptStyle = parseReportStyle(message);
-  if (reptStyle) {
-    return reptStyle;
-  }
+  return [...cmdStyle, ...reptStyle];
 }
