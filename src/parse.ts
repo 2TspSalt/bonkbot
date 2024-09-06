@@ -1,4 +1,10 @@
-export function parseBonk(message: string): {name: string, count: number} | undefined {
+export interface Bonk {
+  name: string;
+  count: number;
+  type: "increment" | "set";
+}
+
+export function parseCommandStyle(message: string): Bonk | undefined {
   const text = message.toString().trim();
   if (!text.startsWith("!bonk")) return;
   const words = text.split(" ");
@@ -8,7 +14,7 @@ export function parseBonk(message: string): {name: string, count: number} | unde
     return;
   }
 
-  const bonkProps = { name: "Lumin", count: 1 };
+  const bonkProps = { name: "Lumin", count: 1, type: "increment" as const };
 
   const lastWord = words.pop();
   if (lastWord) {
@@ -25,4 +31,25 @@ export function parseBonk(message: string): {name: string, count: number} | unde
   }
 
   return bonkProps;
+}
+
+export function parseReportStyle(message: string): Bonk | undefined {
+  const regex = /(.*)\sbonk\s(\d+)/;
+  const matches = message.match(regex);
+  if (!matches) return;
+  const [_, name, countStr] = matches;
+
+  return { name, count: parseInt(countStr, 10), type: "set" as const };
+}
+
+export function parseBonk(message: string): Bonk | undefined {
+  const cmdStyle = parseCommandStyle(message);
+  if (cmdStyle) {
+    return cmdStyle;
+  }
+
+  const reptStyle = parseReportStyle(message);
+  if (reptStyle) {
+    return reptStyle;
+  }
 }

@@ -72,7 +72,12 @@ export async function startChatListener(reschedule: boolean): Promise<void> {
     const text = msg.message.toString();
     const bonk = parseBonk(text);
     if (bonk) {
-      bonkStore.incrementBonk(bonk.name, bonk.count);
+      if (bonk.type === "increment") {
+        bonkStore.incrementBonk(bonk.name, bonk.count);
+      }
+      if (bonk.type === "set") {
+        bonkStore.setBonk(bonk.name, bonk.count);
+      }
     }
   });
 
