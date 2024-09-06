@@ -70,13 +70,15 @@ export async function startChatListener(reschedule: boolean): Promise<void> {
 
     if (!msg.author?.is_moderator) return;
     const text = msg.message.toString();
-    const bonk = parseBonk(text);
-    if (bonk) {
-      if (bonk.type === "increment") {
-        bonkStore.incrementBonk(bonk.name, bonk.count);
-      }
-      if (bonk.type === "set") {
-        bonkStore.setBonk(bonk.name, bonk.count);
+    const bonks = parseBonk(text);
+    for (const bonk of bonks) {
+      if (bonk) {
+        if (bonk.type === "increment") {
+          bonkStore.incrementBonk(bonk.name, bonk.count);
+        }
+        if (bonk.type === "set") {
+          bonkStore.setBonk(bonk.name, bonk.count);
+        }
       }
     }
   });
