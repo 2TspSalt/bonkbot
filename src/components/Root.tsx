@@ -4,7 +4,7 @@ import { BonkCell } from "./BonkCell.tsx";
 
 const pageStyle = css`
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
 `;
 
 export const Root: FC<{ bonkState: Record<string, number>}> = ({ bonkState }) => {

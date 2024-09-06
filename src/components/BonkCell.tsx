@@ -5,6 +5,11 @@ const bonkStyle = css`
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 40px;
+  margin: 10px;
+  background-color: #FEBDBB;
+  border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
   h3 {
     font-size: xx-large;
   }
