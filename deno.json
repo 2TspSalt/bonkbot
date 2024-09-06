@@ -14,6 +14,6 @@
   "tasks": {
     "deploy": "rclone sync . 'bonksrv:bonkbot' --exclude '*.db'",
     "dev": "deno run --watch --allow-all main.tsx",
-    "serve": "deno run --allow-read=. --allow-write=bonks.db --allow-env=KEY,PORT,CLIENTID,CLIENTSECRET --allow-net ./main.tsx"
+    "serve": "deno run --allow-read=.,/tmp/youtubei.js --allow-write=bonks.db --allow-env=KEY,PORT,CLIENTID,CLIENTSECRET,TMPDIR,TMP,TEMP --allow-net ./main.tsx"
   }
 }

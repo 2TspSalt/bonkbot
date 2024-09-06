@@ -1,15 +1,27 @@
 import { Innertube, UniversalCache, YTNodes } from "youtubei";
-import type { Channel } from "youtubei/parser"
+import type { Channel } from "youtubei/parser";
 import { parseBonk } from "./parse.ts";
 import { bonkStore } from "./bonkStore.ts";
 
 const luminId = "UCHXmyTZ3UFbhzpfVgVlrdgw";
 const one_hour = 3600000;
 
+let registered = false;
+
 const getLiveStreams = async (channel: Channel) =>
   (await channel.getLiveStreams()).videos.map((v) => v.as(YTNodes.Video));
 
-export async function startChatListener(): Promise<void> {
+function rescheduleChatListener() {
+  const nextTime = new Date(new Date().valueOf() + one_hour);
+  console.log("No live streams found; trying again at ", nextTime);
+  setTimeout(startChatListener, one_hour);
+}
+
+export async function startChatListener(reschedule: boolean): Promise<void> {
+  if (registered) {
+    return;
+  }
+
   const yt = await Innertube.create({ cache: new UniversalCache(false) });
   const lumin = await yt.getChannel(luminId);
 
@@ -17,9 +29,11 @@ export async function startChatListener(): Promise<void> {
   const liveId = streams.filter((v) => v.is_live)[0]?.id;
 
   if (!liveId) {
-    const nextTime = new Date((new Date()).valueOf() + one_hour)
-    console.log('No live streams found; trying again at ', nextTime)
-    setTimeout(startChatListener, one_hour);
+    if (reschedule) {
+      rescheduleChatListener();
+    } else {
+      console.log("No live streams found; not retrying");
+    }
     return;
   }
 
@@ -29,7 +43,13 @@ export async function startChatListener(): Promise<void> {
   livechat.on("error", (error: Error) =>
     console.error("Live chat error:", error)
   );
-  livechat.on("end", () => console.info("This live stream has ended."));
+  livechat.on("end", () => {
+    console.info("This live stream has ended.");
+    registered = false;
+    if (reschedule) {
+      rescheduleChatListener();
+    }
+  });
 
   livechat.on("chat-update", (action) => {
     if (!action.is(YTNodes.AddChatItemAction)) return;
@@ -57,4 +77,5 @@ export async function startChatListener(): Promise<void> {
   });
 
   livechat.start();
+  registered = true;
 }
