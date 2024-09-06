@@ -1,15 +1,15 @@
 import { Innertube, UniversalCache, YTNodes } from "youtubei";
 import type { Channel } from "youtubei/parser"
 import { parseBonk } from "./parse.ts";
+import { bonkStore } from "./bonkStore.ts";
 
 const luminId = "UCHXmyTZ3UFbhzpfVgVlrdgw";
+const one_hour = 3600000;
 
 const getLiveStreams = async (channel: Channel) =>
   (await channel.getLiveStreams()).videos.map((v) => v.as(YTNodes.Video));
 
-export async function startChatListener(
-  bonkStore: Record<string, number>
-): Promise<void> {
+export async function startChatListener(): Promise<void> {
   const yt = await Innertube.create({ cache: new UniversalCache(false) });
   const lumin = await yt.getChannel(luminId);
 
@@ -17,7 +17,10 @@ export async function startChatListener(
   const liveId = streams.filter((v) => v.is_live)[0]?.id;
 
   if (!liveId) {
-    throw new Error("No live streams");
+    const nextTime = new Date((new Date()).valueOf() + one_hour)
+    console.log('No live streams found; trying again at ', nextTime)
+    setTimeout(startChatListener, one_hour);
+    return;
   }
 
   const info = await yt.getInfo(liveId);
@@ -49,11 +52,7 @@ export async function startChatListener(
     const text = msg.message.toString();
     const bonk = parseBonk(text);
     if (bonk) {
-      if (!bonkStore[bonk.name]) {
-        bonkStore[bonk.name] = bonk.count;
-      } else {
-        bonkStore[bonk.name] = bonkStore[bonk.name] + bonk.count;
-      }
+      bonkStore.incrementBonk(bonk.name, bonk.count);
     }
   });
 
