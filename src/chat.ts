@@ -1,7 +1,7 @@
 import { Innertube, UniversalCache, YTNodes } from "youtubei";
 import type { Channel } from "youtubei/parser";
 import { parseBonk } from "./parse.ts";
-import { bonkStore } from "./bonkStore.ts";
+import { bonkStore } from "./stores/bonkStore.ts";
 
 const luminId = "UCHXmyTZ3UFbhzpfVgVlrdgw";
 const one_hour = 3600000;

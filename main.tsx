@@ -4,7 +4,7 @@ import { serveStatic } from "hono/deno";
 
 import { startChatListener } from "./src/chat.ts";
 import { Root } from "./src/components/Root.tsx";
-import { bonkStore } from "./src/bonkStore.ts";
+import { bonkStore } from "./src/stores/bonkStore.ts";
 
 startChatListener(true);
 
